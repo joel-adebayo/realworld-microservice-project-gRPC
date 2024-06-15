@@ -69,44 +69,44 @@ pipeline {
         //     }
         // }
         // // Deploy to The Staging/Test Environment
-        // stage('Deploy Microservice To The Stage/Test Env'){
-        //     steps{
-        //         script{
-        //             withKubeConfig(caCertificate: '', clusterName: '', contextName: '', credentialsId: 'Kubernetes-Credential', namespace: '', restrictKubeConfigAccess: false, serverUrl: '') {
-        //                sh 'kubectl apply -f deploy-envs/test-env/test-namespace.yaml'
-        //                sh 'kubectl apply -f deploy-envs/test-env/deployment.yaml'
-        //                sh 'kubectl apply -f deploy-envs/test-env/nodeport-service.yaml'  //NodePort Service
-        //            }
-        //         }
-        //     }
-        // }
-        // // Perform DAST Test on Application
-        // stage('ZAP Dynamic Testing | DAST') {
-        //     steps {
-        //         sshagent(['OWASP-Zap-Credential']) {
-        //             sh 'ssh -o StrictHostKeyChecking=no ubuntu@34.71.9.167 "docker run -t zaproxy/zap-weekly zap-baseline.py -t http://34.45.175.156:30000/" || true'
-        //                                                 //JENKINS_PUBLIC_IP                                                   //EKS_WORKER_NODE_IP_ADDRESS:30000
-        //         }
-        //     }
-        // }
-        // // Production Deployment Approval
-        // stage('Approve Prod Deployment') {
-        //     steps {
-        //             input('Do you want to proceed?')
-        //     }
-        // }
-        // // // Deploy to The Production Environment
-        // stage('Deploy Microservice To The Prod Env'){
-        //     steps{
-        //         script{
-        //             withKubeConfig(caCertificate: '', clusterName: '', contextName: '', credentialsId: 'Kubernetes-Credential', namespace: '', restrictKubeConfigAccess: false, serverUrl: '') {
-        //                sh 'kubectl apply -f deploy-envs/prod-env/prod-namespace.yaml'
-        //                sh 'kubectl apply -f deploy-envs/prod-env/deployment.yaml'
-        //                sh 'kubectl apply -f deploy-envs/prod-env/loadbalancer-service.yaml'  //LoadBalancer Service
-        //             }
-        //         }
-        //     }
-        // }
+        stage('Deploy Microservice To The Stage/Test Env'){
+            steps{
+                script{
+                    withKubeConfig(caCertificate: '', clusterName: '', contextName: '', credentialsId: 'Kubernetes-Credential', namespace: '', restrictKubeConfigAccess: false, serverUrl: '') {
+                       sh 'kubectl apply -f deploy-envs/test-env/test-namespace.yaml'
+                       sh 'kubectl apply -f deploy-envs/test-env/deployment.yaml'
+                       sh 'kubectl apply -f deploy-envs/test-env/nodeport-service.yaml'  //NodePort Service
+                   }
+                }
+            }
+        }
+        // Perform DAST Test on Application
+        stage('ZAP Dynamic Testing | DAST') {
+            steps {
+                sshagent(['OWASP-Zap-Credential']) {
+                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@18.235.255.182 "docker run -t zaproxy/zap-weekly zap-baseline.py -t http://18.216.140.183:30000/" || true'
+                                                        //JENKINS_PUBLIC_IP                                                   //EKS_WORKER_NODE_IP_ADDRESS:30000
+                }
+            }
+        }
+        // Production Deployment Approval
+        stage('Approve Prod Deployment') {
+            steps {
+                    input('Do you want to proceed?')
+            }
+        }
+        // // Deploy to The Production Environment
+        stage('Deploy Microservice To The Prod Env'){
+            steps{
+                script{
+                    withKubeConfig(caCertificate: '', clusterName: '', contextName: '', credentialsId: 'Kubernetes-Credential', namespace: '', restrictKubeConfigAccess: false, serverUrl: '') {
+                       sh 'kubectl apply -f deploy-envs/prod-env/prod-namespace.yaml'
+                       sh 'kubectl apply -f deploy-envs/prod-env/deployment.yaml'
+                       sh 'kubectl apply -f deploy-envs/prod-env/loadbalancer-service.yaml'  //LoadBalancer Service
+                    }
+                }
+            }
+        }
     }
     post {
     always {
